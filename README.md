@@ -5,18 +5,18 @@ Foreman, T.M., Grant, E.H.C., and Weir, L.A., 2017, North American Amphibian Mon
  
 
 ## Data files: 
-*CountsWithComplexes.csv*- original NAAMP data for counts
-*CountsWithoutComplexes.csv*- original NAAMP data for counts (excluding species complex designations)
-*frogedgelist.csv*- edgelist generated from *CountsWithComplexes.csv* using *GenerateEdgeLists.Rmd*
-*frogedgelist_cwoc.csv* - edgelist generated from *CountsWithoutComplexes.csv* using *GenerateEdgeLists.Rmd*
+* *CountsWithComplexes.csv*- original NAAMP data for counts
+* *CountsWithoutComplexes.csv*- original NAAMP data for counts (excluding species complex designations)
+* *frogedgelist.csv*- edgelist generated from *CountsWithComplexes.csv* using *GenerateEdgeLists.Rmd*
+* *frogedgelist_cwoc.csv* - edgelist generated from *CountsWithoutComplexes.csv* using *GenerateEdgeLists.Rmd*
 
 
 ## Code files:
-*GenerateEdgeLists.Rmd*- generate edgelists from *CountsWithComplexes.csv* and *CountsWithoutComplexes.csv* datasets
-*CountsWithComplexes.Rmd*- generate frigures for *Hyla cinerea* for counts with complexes data using *frogedgelist.csv*
-*CountsWithoutComplexes.Rmd*- generate frigures for *Hyla cinerea* for counts with complexes data using *frogedgelist_cwoc.csv*
-*CWC_chrysoscelis.Rmd* -generate frigures for *Hyla chrysoscelis* for counts with complexes data using *frogedgelist.csv*
-*CWOC_chrysoscelis.Rmd*- generate frigures for *Hyla chrysoscelis* for counts with complexes data using *frogedgelist_cwoc.csv*
+* *GenerateEdgeLists.Rmd*- generate edgelists from *CountsWithComplexes.csv* and *CountsWithoutComplexes.csv* datasets
+* *CountsWithComplexes.Rmd*- generate frigures for *Hyla cinerea* for counts with complexes data using *frogedgelist.csv*
+* *CountsWithoutComplexes.Rmd*- generate frigures for *Hyla cinerea* for counts with complexes data using *frogedgelist_cwoc.csv*
+* *CWC_chrysoscelis.Rmd* -generate frigures for *Hyla chrysoscelis* for counts with complexes data using *frogedgelist.csv*
+* *CWOC_chrysoscelis.Rmd*- generate frigures for *Hyla chrysoscelis* for counts with complexes data using *frogedgelist_cwoc.csv*
 
 ## Figure metadata:
 Figures were generated for two focal species *Hyla chrysoscelis* and *Hyla cinerea*. All *Hyla chrysoscelis* figures begin with "Chrysoscelis"
