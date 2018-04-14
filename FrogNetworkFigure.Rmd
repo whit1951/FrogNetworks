@@ -1,0 +1,193 @@
+---
+title: "Frog Networks"
+author: "Lauren White"
+date: "April 10, 2018"
+output: html_document
+---
+
+##Load data
+```{r} 
+setwd("C:/Users/law2y/OneDrive/R Code/FrogNetworks")
+cwc<-read.csv("CountsWithComplexes.csv")
+cwoc<-read.csv("CountsWithoutComplexes.csv")
+
+#drop columns that got imported for csv files for some reason
+cwc <- subset(cwc, select = -c(X,X.1) ) 
+cwoc <- subset(cwoc, select = -c(X,X.1) )
+
+
+unique(cwc$Species.ID) #how many unique species?
+length(unique(cwc$Transect))
+dates<-unique(cwc$Date)
+
+#create separate column that combines transect + stop location
+cwc$transectstop<- paste(cwc$Transect,cwc$Stop, sep="-") 
+cwoc$transectstop<- paste(cwoc$Transect,cwoc$Stop, sep="-")
+
+```
+
+##Generate edgelist
+Which species have called on same date at same transect & stop?
+Beware: this takes a while to run.
+
+```{r, eval=FALSE}
+dates<-unique(cwc$Date) #how many dates of observation in dataset?
+
+#With complexes
+edgelist<-NULL
+
+for(i in 1:length(dates)){
+  sub_cwc<-cwc[which(cwc$Date==dates[i]),]
+  edgelist_sub<-data.frame(Species=sub_cwc$Species, Location=sub_cwc$transectstop)
+  edgelist<-rbind(edgelist, edgelist_sub)
+  #browser()
+}
+write.csv(edgelist,file="frogedgelist.csv")
+
+#Without complexes
+dates<-unique(cwoc$Date) #how many dates of observation in dataset?
+edgelist<-NULL
+
+for(i in 1:length(dates)){
+  sub_cwoc<-cwoc[which(cwoc$Date==dates[i]),]
+  edgelist_sub<-data.frame(Species=sub_cwoc$Species, Location=sub_cwoc$transectstop)
+  edgelist<-rbind(edgelist, edgelist_sub)
+  #browser()
+}
+write.csv(edgelist,file="frogedgelist_cwoc.csv")
+```
+
+Or load edgelist
+```{r}
+edgelist<-read.csv("frogedgelist.csv")
+#edgelist<-read.csv("frogedgelist_cwoc.csv")
+```
+
+Translate into affiliation matrix
+```{r}
+library('Matrix')
+A <- spMatrix(nrow=length(unique(edgelist$Species)),
+        ncol=length(unique(edgelist$Location)),
+        i = as.numeric(factor(edgelist$Species)),
+        j = as.numeric(factor(edgelist$Location)),
+        x = rep(1, length(as.numeric(edgelist$Species))) )
+row.names(A) <- levels(factor(edgelist$Species))
+colnames(A) <- levels(factor(edgelist$Location))
+A
+
+#Frogs have edges if they were at same transect & stop on same day
+Arow <- tcrossprod(A)
+Arow
+
+```
+
+## Plot using igraph
+This site s a great resource: <http://www.shizukalab.com/toolkits/sna/weighted-edges>
+```{r}
+library(igraph)
+
+g<-graph_from_adjacency_matrix(Arow, mode = "undirected", weighted = TRUE, diag = FALSE,
+  add.colnames = NULL, add.rownames = NA)
+summary(g)
+E(g)$weight
+
+plot.igraph(g,vertex.label=V(g)$name,layout=layout.fruchterman.reingold, edge.color="black",edge.width=E(g)$weight/200)
+
+```
+
+##Look at community membership and/or modularity
+```{r}
+comps <- clusters(g)$membership
+colbar <- rainbow(max(comps)+1)
+V(g)$color <- colbar[comps+1]
+plot(g, layout=layout.fruchterman.reingold, vertex.size=5, vertex.label=NA, edge.arrow.size=0)
+
+wtc<-walktrap.community(g) #searching algorithm that finds communities via random walks
+modularity(wtc)
+modularity(g,membership(wtc))
+plot(wtc,g,vertex.label=NA,edge.arrow.size=0,edge.color="black")
+
+```
+
+##Panel A.  
+A global network with all the frogs that co-call with *Hyla cinerea*. Unweighted edges.
+```{r}
+species<-which(rownames(Arow)=="Hyla cinerea")
+cocall<-Arow[,species] #Row in matrix containing Hylea cinerea 
+cocall<-which(cocall>0) #Species that co-call with Hyla cinera (edge weight > 0)
+#cocall<-sort(cocall, decreasing = TRUE)
+
+mat_all<-Arow[which(rownames(Arow)%in% names(cocall)), which(colnames(Arow) %in% names(cocall))] #subnetwork containing only species that co-call with Hyla cinerea
+
+
+g<-graph_from_adjacency_matrix(mat_all, mode = "undirected", weighted = NULL, diag = FALSE,  add.colnames = NULL, add.rownames = NA)
+summary(g)
+
+#assign the "IsHyla" attribute as the vertex color
+attrib_all<-data.frame(Species=names(cocall), IsHyla=names(cocall)=="Hyla cinerea")
+V(g)$IsHyla=as.character(attrib_all$IsHyla[match(V(g)$name,attrib_all$Species)])
+V(g)$color=V(g)$IsHyla 
+V(g)$color=gsub(FALSE,"yellow",V(g)$color)
+V(g)$color=gsub(TRUE,"red",V(g)$color)
+
+l <- layout_with_fr(g)
+plot.igraph(g,vertex.label=NA,layout=l)
+coords <- layout.fruchterman.reingold(g)
+hist(degree(g))
+
+
+
+```
+
+##Panel B.  
+A network with Hyla cinerea and the 10 frogs that most commonly co-call. With weighted edges. It would be nice if we could set some threshold by which we can include more in this smaller network. So set x to 11 most commonly co-calling other frogs, 12 most commonly co-calling other frogs, etc.
+
+Mark would love that the nodes in panels A and B actually be in the same spatial locations in each figure. I told him that I didn't think that was possible, but that I'd ask you. As a compromise, I suggested that we could color the nodes of the species that are included in both panels the same color.
+
+```{r}
+species<-which(rownames(Arow)=="Hyla cinerea")
+cocall<-Arow[,species] #Row in matrix containing Hylea cinerea 
+cocall<-sort(cocall, decreasing = TRUE)
+
+topten<-cocall[1:11] #includeing Hyla cinerea (adjust last number in sequence to get top x number of co-calling species)
+
+sublayout<-which(V(g)$name %in% names(topten)) #which nodes in original graph are in top ten graph?
+newlayout<-coords[sublayout,] #get coordinates of nodes in orignal network
+
+mat10<-Arow[which(rownames(Arow)%in% names(topten)), which(colnames(Arow) %in% names(topten))] #subnetwork containing only top ten species that co-call with Hyla cinerea
+
+h<-graph_from_adjacency_matrix(mat10, mode = "undirected", weighted = TRUE, diag = FALSE, add.colnames = NULL, add.rownames = NA)
+summary(h)
+E(h)$weight #weighted edges this time
+
+attrib<-data.frame(Species=names(topten), Weight=topten, IsHyla=names(topten)=="Hyla cinerea") #create an attribute data frame- is the species of interest, or not?
+
+#assign as vertex attribute- is focal species or not?
+V(h)$IsHyla=as.character(attrib$IsHyla[match(V(h)$name,attrib$Species)])
+
+V(h)$color=V(h)$IsHyla #assign the "IsHyla" attribute as the vertex color
+V(h)$color=gsub(FALSE,"white",V(h)$color)
+V(h)$color=gsub(TRUE,"white",V(h)$color)
+plot.igraph(h,vertex.label=V(h)$name,layout=newlayout,edge.width=E(h)$weight/200)
+
+l <- layout_with_fr(h)
+l2 <- layout_as_star(h, center = V(h)[6], order = NULL)
+l3 <-layout.circle(h)
+
+plot.igraph(h,vertex.label=V(h)$name,layout=l,edge.width=E(h)$weight/200)
+plot.igraph(h,vertex.label=V(h)$name,layout=l2,edge.width=E(h)$weight/200)
+plot.igraph(h,vertex.label=V(h)$name,layout=l3,edge.width=E(h)$weight/200)
+
+
+#degree distrubutions for global network
+#labeled and unlabeled version
+#just white?
+#eps/tiff 
+#dimensions
+#star
+#paragraph on methods section
+
+#Hyla chrysoscelis/replicate?
+```
+
+
