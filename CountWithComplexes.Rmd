@@ -1,0 +1,141 @@
+---
+title: "Counts With Complexes Analysis"
+author: "Lauren White"
+date: "April 12, 2018"
+output: html_document
+---
+
+##Load libraries, dataset, and edgelist
+```{r}
+library(igraph)
+edgelist<-read.csv("frogedgelist.csv")
+#edgelist<-read.csv("frogedgelist_cwoc.csv")
+cwc<-read.csv("CountsWithComplexes.csv")
+#cwoc<-read.csv("CountsWithoutComplexes.csv")
+
+```
+
+##Translate into a weighted affiliation matrix
+Using sparse matrices
+```{r}
+library('Matrix')
+A <- spMatrix(nrow=length(unique(edgelist$Species)),
+        ncol=length(unique(edgelist$Location)),
+        i = as.numeric(factor(edgelist$Species)),
+        j = as.numeric(factor(edgelist$Location)),
+        x = rep(1, length(as.numeric(edgelist$Species))) )
+row.names(A) <- levels(factor(edgelist$Species))
+colnames(A) <- levels(factor(edgelist$Location))
+A
+
+#Frogs have edges if they were at same transect & stop on same day
+Arow <- tcrossprod(A)
+Arow
+
+```
+
+##Global network for species that co-call with *Hyla cinerea*
+A global network with all the frogs that co-call with *Hyla cinerea*. Unweighted edges.
+```{r}
+#which row in the association matrix corresponds to Hyla cinerea
+species<-which(rownames(Arow)=="Hyla cinerea")
+cocall<-Arow[,species] #Row in matrix containing Hylea cinerea 
+
+#Which species co-call with Hyla cinera (edge weight > 0)
+cocall<-which(cocall>0) 
+
+#Generate sub containing only species that co-call with Hyla cinerea
+mat_all<-Arow[which(rownames(Arow)%in% names(cocall)), which(colnames(Arow) %in% names(cocall))] 
+
+mat_all[mat_all > 1] <- 1
+
+
+#Create igraph object
+g<-graph_from_adjacency_matrix(mat_all, mode = "undirected", weighted = NULL, diag = FALSE,  add.colnames = NULL, add.rownames = NA)
+summary(g)
+
+V(g)$number=as.character(cwc$Species.ID[match(V(g)$name,cwc$Species)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+
+#Optional: assign the "IsHyla" attribute as the vertex color (Just comment out if you want everything the same color)
+attrib_all<-data.frame(Species=names(cocall), IsHyla=names(cocall)=="Hyla cinerea")
+V(g)$IsHyla=as.character(attrib_all$IsHyla[match(V(g)$name, attrib_all$Species)])
+V(g)$color=V(g)$IsHyla
+V(g)$color=gsub(FALSE,"white",V(g)$color)
+V(g)$color=gsub(TRUE,"white",V(g)$color)
+
+
+#Look at degree distribution for glboal network
+hist(degree(g))
+library(ggplot2)
+
+tiff("Global_dd_cwc.tiff", height =10 , width =12, units = "cm", compression = "lzw", res = 1200)
+qplot(degree(g), geom="histogram", main = "Degree distribution: Co-calling with Hyla cinerea", xlab = "degree", fill=I("blue"), col=I("black"), alpha=I(.2),   xlim=c(0,60))
+dev.off()
+
+#Reduce labeling relative
+V(g)$label.cex = .60
+l<-layout.fruchterman.reingold(g)
+
+#Note: #21 corresponds to the Species.ID for *Hyla cinerea*
+tiff("Global_network_cwc_labeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(g,vertex.label=V(g)$number, layout=l)
+dev.off()
+
+tiff("Global_network_cwc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(g,vertex.label=NA, layout=l)
+dev.off()
+
+#Note: you can adjust node location manually using this command:
+tkplot(g)
+
+```
+
+##Top ten co-callers 
+A network with *Hyla cinerea* and the 10 frogs that most commonly co-call. With weighted edges. 
+
+```{r}
+species<-which(rownames(Arow)=="Hyla cinerea")
+cocall<-Arow[,species] #Row in matrix containing Hylea cinerea 
+cocall<-sort(cocall, decreasing = TRUE)
+
+topten<-cocall[1:11] #includeing Hyla cinerea (adjust last number in sequence to get top x number of co-calling species)
+
+mat10<-Arow[which(rownames(Arow)%in% names(topten)), which(colnames(Arow) %in% names(topten))] #subnetwork containing only top ten species that co-call with Hyla cinerea
+
+h<-graph_from_adjacency_matrix(mat10, mode = "undirected", weighted = TRUE, diag = FALSE, add.colnames = NULL, add.rownames = NA)
+summary(h)
+E(h)$weight #weighted edges this time
+
+attrib<-data.frame(Species=names(topten), Weight=topten, IsHyla=names(topten)=="Hyla cinerea") #create an attribute data frame- is the species the focal species, or not?
+
+#assign as vertex attribute- is species focal species or not?
+V(h)$IsHyla=as.character(attrib$IsHyla[match(V(h)$name,attrib$Species)])
+V(h)$color=V(h)$IsHyla #assign the "IsHyla" attribute as the vertex color
+V(h)$color=gsub(FALSE,"white",V(h)$color)
+V(h)$color=gsub(TRUE,"white",V(h)$color)
+
+
+l <- layout_with_fr(h)
+l2 <- layout_as_star(h, center = V(h)[6], order = NULL)
+l3 <-layout.circle(h)
+
+#reduce vertex label size
+V(h)$label.cex = .30
+
+tiff("Topten_star_cwc_labeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(h,vertex.label=V(h)$name,layout=l2,edge.width=E(h)$weight/250)
+dev.off()
+
+tiff("Topten_star_cwc_ unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(h,vertex.label=NA,layout=l2,edge.width=E(h)$weight/250)
+dev.off()
+
+tiff("Topten_circle_cwc_labeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(h,vertex.label=V(h)$name,layout=l3,edge.width=E(h)$weight/250)
+dev.off()
+
+tiff("Topten_circle_cwc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(h,vertex.label=NA,layout=l3,edge.width=E(h)$weight/250)
+dev.off()
+
+```
