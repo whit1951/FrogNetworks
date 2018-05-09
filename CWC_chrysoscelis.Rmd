@@ -5,7 +5,7 @@ date: "April 12, 2018"
 output: html_document
 ---
 
-## Load libraries, dataset, and edgelist
+##Load libraries, dataset, and edgelist
 ```{r}
 library(igraph)
 edgelist<-read.csv("frogedgelist.csv")
@@ -15,7 +15,7 @@ cwc<-read.csv("CountsWithComplexes.csv")
 
 ```
 
-## Translate into a weighted affiliation matrix
+##Translate into a weighted affiliation matrix
 Using sparse matrices
 ```{r}
 library('Matrix')
@@ -34,7 +34,7 @@ Arow
 
 ```
 
-## Global network for species that co-call with *Hyla chrysoscelis*
+##Global network for species that co-call with *Hyla chrysoscelis*
 A global network with all the frogs that co-call with *Hyla chrysoscelis*. Unweighted edges.
 ```{r}
 #which row in the association matrix corresponds to Hyla chrysoscelis
@@ -72,25 +72,26 @@ tiff("Chrysoscelis_Global_dd_cwc.tiff", height =10 , width =12, units = "cm", co
 qplot(degree(g), geom="histogram", main = "Degree distribution: Co-calling with Hyla chrysoscelis", xlab = "degree", fill=I("blue"), col=I("black"), alpha=I(.2),   xlim=c(0,60))
 dev.off()
 
-#Reduce labeling relative
-V(g)$label.cex = .60
+#Reduce labeling relative to node size
+V(g)$label.cex = .40
+V(g)$vertex.size =6
 l<-layout.fruchterman.reingold(g)
 
 #Note: #21 corresponds to the Species.ID for *Hyla chrysoscelis*
 tiff("Chrysoscelis_Global_network_cwc_labeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
-plot.igraph(g,vertex.label=V(g)$number, layout=l)
+plot.igraph(g,vertex.label=V(g)$number, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
 dev.off()
 
 tiff("Chrysoscelis_Global_network_cwc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
-plot.igraph(g,vertex.label=NA, layout=l)
+plot.igraph(g,vertex.label=NA, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
 dev.off()
 
 #Note: you can adjust node location manually using this command:
-tkplot(g)
+#tkplot(g)
 
 ```
 
-## Top ten co-callers 
+##Top ten co-callers 
 A network with *Hyla chrysoscelis* and the 10 frogs that most commonly co-call. With weighted edges. 
 
 ```{r}
@@ -123,19 +124,19 @@ l3 <-layout.circle(h)
 V(h)$label.cex = .30
 
 tiff("Chrysoscelis_Topten_star_cwc_labeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
-plot.igraph(h,vertex.label=V(h)$name,layout=l2,edge.width=E(h)$weight/750)
+plot.igraph(h,vertex.label=V(h)$name,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
 tiff("Chrysoscelis_Topten_star_cwc_ unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
-plot.igraph(h,vertex.label=NA,layout=l2,edge.width=E(h)$weight/750)
+plot.igraph(h,vertex.label=NA,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
 tiff("Chrysoscelis_Topten_circle_cwc_labeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
-plot.igraph(h,vertex.label=V(h)$name,layout=l3,edge.width=E(h)$weight/750)
+plot.igraph(h,vertex.label=V(h)$name,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
 tiff("Chrysoscelis_Topten_circle_cwc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
-plot.igraph(h,vertex.label=NA,layout=l3,edge.width=E(h)$weight/750)
+plot.igraph(h,vertex.label=NA,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
 ```
