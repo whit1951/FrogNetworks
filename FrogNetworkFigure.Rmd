@@ -5,7 +5,7 @@ date: "April 10, 2018"
 output: html_document
 ---
 
-##Load data
+## Load data
 ```{r} 
 setwd("C:/Users/law2y/OneDrive/R Code/FrogNetworks")
 cwc<-read.csv("CountsWithComplexes.csv")
@@ -26,7 +26,7 @@ cwoc$transectstop<- paste(cwoc$Transect,cwoc$Stop, sep="-")
 
 ```
 
-##Generate edgelist
+## Generate edgelist
 Which species have called on same date at same transect & stop?
 Beware: this takes a while to run.
 
@@ -57,13 +57,13 @@ for(i in 1:length(dates)){
 write.csv(edgelist,file="frogedgelist_cwoc.csv")
 ```
 
-Or load edgelist
+## Or load edgelist
 ```{r}
 edgelist<-read.csv("frogedgelist.csv")
 #edgelist<-read.csv("frogedgelist_cwoc.csv")
 ```
 
-Translate into affiliation matrix
+## Translate into affiliation matrix
 ```{r}
 library('Matrix')
 A <- spMatrix(nrow=length(unique(edgelist$Species)),
@@ -95,7 +95,7 @@ plot.igraph(g,vertex.label=V(g)$name,layout=layout.fruchterman.reingold, edge.co
 
 ```
 
-##Look at community membership and/or modularity
+## Look at community membership and/or modularity
 ```{r}
 comps <- clusters(g)$membership
 colbar <- rainbow(max(comps)+1)
@@ -109,7 +109,7 @@ plot(wtc,g,vertex.label=NA,edge.arrow.size=0,edge.color="black")
 
 ```
 
-##Panel A.  
+## Panel A.  
 A global network with all the frogs that co-call with *Hyla cinerea*. Unweighted edges.
 ```{r}
 species<-which(rownames(Arow)=="Hyla cinerea")
@@ -139,7 +139,7 @@ hist(degree(g))
 
 ```
 
-##Panel B.  
+## Panel B.  
 A network with Hyla cinerea and the 10 frogs that most commonly co-call. With weighted edges. It would be nice if we could set some threshold by which we can include more in this smaller network. So set x to 11 most commonly co-calling other frogs, 12 most commonly co-calling other frogs, etc.
 
 Mark would love that the nodes in panels A and B actually be in the same spatial locations in each figure. I told him that I didn't think that was possible, but that I'd ask you. As a compromise, I suggested that we could color the nodes of the species that are included in both panels the same color.
