@@ -5,7 +5,7 @@ date: "April 12, 2018"
 output: html_document
 ---
 
-##Load libraries, dataset, and edgelist
+## Load libraries, dataset, and edgelist
 ```{r}
 library(igraph)
 #edgelist2<-read.csv("frogedgelist.csv")
@@ -15,7 +15,7 @@ cwoc<-read.csv("CountsWithoutComplexes.csv")
 
 ```
 
-##Translate into a weighted affiliation matrix
+## Translate into a weighted affiliation matrix
 Using sparse matrices
 ```{r}
 library('Matrix')
@@ -34,7 +34,7 @@ Arow
 
 ```
 
-##Global network for species that co-call with *Hyla chrysoscelis*
+## Global network for species that co-call with *Hyla chrysoscelis*
 A global network with all the frogs that co-call with *Hyla chrysoscelis*. Unweighted edges.
 ```{r}
 
@@ -92,7 +92,7 @@ dev.off()
 
 ```
 
-##Top ten co-callers 
+## Top ten co-callers 
 A network with *Hyla chrysoscelis* and the 10 frogs that most commonly co-call. With weighted edges. 
 
 ```{r}
