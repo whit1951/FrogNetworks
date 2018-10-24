@@ -73,6 +73,12 @@ tiff("Chrysoscelis_Global_dd_cwoc.tiff", height =10 , width =12, units = "cm", c
 qplot(degree(g), geom="histogram", main = "Degree distribution: Co-calling with Hyla chrysoscelis", xlab = "degree", fill=I("blue"), col=I("black"), alpha=I(.2),   xlim=c(0,60))
 dev.off()
 
+ps.options(fonts = "serif") #default font for igraph package is serif; not immediately recognized by postscript function
+postscript("Chrysoscelis_Global_dd_cwoc.eps", height =10 , width =12)
+qplot(degree(g), geom="histogram", main = "Degree distribution: Co-calling with Hyla chrysoscelis", xlab = "degree", fill=I("blue"), col=I("black"), alpha=I(.2),   xlim=c(0,60))
+dev.off()
+
+
 #Reduce labeling relative to node size
 V(g)$label.cex = .40
 V(g)$vertex.size =6
@@ -83,7 +89,15 @@ tiff("Chrysoscelis_Global_network_cwoc_labeled.tiff", height =10 , width =10, un
 plot.igraph(g,vertex.label=V(g)$number, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
 dev.off()
 
+postscript("Chrysoscelis_Global_network_cwoc_labeled.eps", height =10 , width =10)
+plot.igraph(g,vertex.label=V(g)$number, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
+dev.off()
+
 tiff("Chrysoscelis_Global_network_cwoc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(g,vertex.label=NA, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
+dev.off()
+
+postscript("Chrysoscelis_Global_network_cwoc_unlabeled.eps")
 plot.igraph(g,vertex.label=NA, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
 dev.off()
 
@@ -128,7 +142,17 @@ tiff("Chrysoscelis_Topten_star_cwoc_labeled.tiff", height =10 , width =10, units
 plot.igraph(h,vertex.label=V(h)$name,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
+ps.options(fonts = "serif") #default font for igraph package is serif; not immediately recognized by postscript function
+postscript("Chrysoscelis_Topten_star_cwoc_labeled.eps")
+plot.igraph(h,vertex.label=V(h)$name,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
+dev.off()
+
+
 tiff("Chrysoscelis_Topten_star_cwoc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(h,vertex.label=NA,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
+dev.off()
+
+postscript("Chrysoscelis_Topten_star_cwoc_unlabeled.eps", height =10 , width =10)
 plot.igraph(h,vertex.label=NA,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
@@ -136,7 +160,15 @@ tiff("Chrysoscelis_Topten_circle_cwoc_labeled.tiff", height =10 , width =10, uni
 plot.igraph(h,vertex.label=V(h)$name,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
+postscript("Chrysoscelis_Topten_circle_cwoc_labeled.eps", height =10 , width =10)
+plot.igraph(h,vertex.label=V(h)$name,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
+dev.off()
+
 tiff("Chrysoscelis_Topten_circle_cwoc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(h,vertex.label=NA,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
+dev.off()
+
+postscript("Chrysoscelis_Topten_circle_cwoc_unlabeled.eps")
 plot.igraph(h,vertex.label=NA,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 

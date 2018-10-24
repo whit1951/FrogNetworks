@@ -72,6 +72,12 @@ tiff("Global_dd_cwoc.tiff", height =10 , width =12, units = "cm", compression = 
 qplot(degree(g), geom="histogram", main = "Degree distribution: Co-calling with Hyla cinerea", xlab = "degree", fill=I("blue"), col=I("black"), alpha=I(.2),   xlim=c(0,60))
 dev.off()
 
+ps.options(fonts = "serif") #default font for igraph package is serif; not immediately recognized by postscript function
+postscript("Global_dd_cwoc.eps", height =10 , width =12)
+qplot(degree(g), geom="histogram", main = "Degree distribution: Co-calling with Hyla cinerea", xlab = "degree", fill=I("blue"), col=I("black"), alpha=I(.2),   xlim=c(0,60))
+dev.off()
+
+
 #Reduce labeling relative to node size
 V(g)$label.cex = .40
 V(g)$vertex.size =6
@@ -82,10 +88,17 @@ tiff("Global_network_cwoc_labeled.tiff", height =10 , width =10, units = "cm", c
 plot.igraph(g,vertex.label=V(g)$number, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
 dev.off()
 
+postscript("Global_network_cwoc_labeled.eps", height =10 , width =10)
+plot.igraph(g,vertex.label=V(g)$number, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
+dev.off()
+
 tiff("Global_network_cwoc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
 plot.igraph(g,vertex.label=NA, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
 dev.off()
 
+postscript("Global_network_cwoc_unlabeled.eps", height =10 , width =10)
+plot.igraph(g,vertex.label=NA, layout=l, vertex.size=12, edge.width=.2, edge.color="black")
+dev.off()
 #Note: you can adjust node location manually using this command:
 #tkplot(g)
 
@@ -118,7 +131,7 @@ V(h)$color=gsub(TRUE,"white",V(h)$color)
 
 
 l <- layout_with_fr(h)
-l2 <- layout_as_star(h, center = V(h)[6], order = c(11, 10, 5, 1, 3, 2, 8, 4, 9, 7))
+l2 <- layout_as_star(h, center = V(h)[6], order = c(6, 11, 10, 5, 1, 3, 2, 8, 4, 9, 7))
 l2 <- layout_as_star(h, center = V(h)[6], order = NULL)
 
 l3 <-layout.circle(h)
@@ -130,16 +143,34 @@ tiff("Topten_star_cwoc_labeled.tiff", height =10 , width =10, units = "cm", comp
 plot.igraph(h,vertex.label=V(h)$name,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
+ps.options(fonts = "serif") #default font for igraph package is serif; not immediately recognized by postscript function
+postscript("Topten_star_cwoc_labeled.eps", height =10 , width =10)
+plot.igraph(h,vertex.label=V(h)$name,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
+dev.off()
+
+
 tiff("Topten_star_cwoc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
 plot.igraph(h,vertex.label=NA,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
+
+postscript("Topten_star_cwoc_unlabeled.eps", height =10 , width =10)
+plot.igraph(h,vertex.label=NA,layout=l2,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
+dev.off()
+
 
 tiff("Topten_circle_cwoc_labeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
 plot.igraph(h,vertex.label=V(h)$name,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
+postscript("Topten_circle_cwoc_labeled.eps", height =10 , width =10)
+plot.igraph(h,vertex.label=V(h)$name,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
+dev.off()
 
 tiff("Topten_circle_cwoc_unlabeled.tiff", height =10 , width =10, units = "cm", compression = "lzw", res = 1200)
+plot.igraph(h,vertex.label=NA,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
+dev.off()
+
+postscript("Topten_circle_cwoc_unlabeled.eps", height =10 , width =10)
 plot.igraph(h,vertex.label=NA,layout=l3,edge.width=sqrt(E(h)$weight)/15, edge.color="black")
 dev.off()
 
